@@ -1,0 +1,28 @@
+<assembly>
+  <id>bin</id>
+  <formats>
+    <format>jar</format>
+  </formats>
+  <includeBaseDirectory>false</includeBaseDirectory>
+  <dependencySets>
+	<dependencySet>
+		<useProjectArtifact>false</useProjectArtifact>
+		<outputDirectory>lib</outputDirectory>
+<!-- 		<includes> -->
+<!-- 			<include>org.apache.hadoop:hadoop-core</include> -->
+<!-- 		</includes> -->
+	</dependencySet>
+  </dependencySets>
+  <fileSets>
+    <fileSet>
+      <directory>target/classes</directory>
+      <outputDirectory>/</outputDirectory>
+<!--       <includes> -->
+<!--         <include>**/*</include> -->
+<!--       </includes> -->
+       <excludes>
+        <exclude>*.xml</exclude>
+      </excludes>
+    </fileSet>
+  </fileSets>
+</assembly>

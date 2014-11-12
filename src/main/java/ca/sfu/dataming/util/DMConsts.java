@@ -6,4 +6,5 @@ package ca.sfu.dataming.util;
  * To change this template use File | Settings | File Templates.
  */
 public class DMConsts {
+    public static final String SON_SUPPORT_THRSHLD = "son.support.thrshld";
 }

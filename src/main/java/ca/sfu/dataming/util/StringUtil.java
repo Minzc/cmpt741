@@ -525,11 +525,9 @@ public class StringUtil {
 			pos = str.indexOf(lcs);
 			// Merge the rest with different special character (avoiding false
 			// match due to merge operation).
-			str = str.substring(0, pos) + 'Ê'
-					+ str.substring(pos + lcs.length());
+			str = str.substring(0, pos) + "Ê" + str.substring(pos + lcs.length());
 			pos = refStr.indexOf(lcs);
-			refStr = refStr.substring(0, pos) + 'Ô'
-					+ refStr.substring(pos + lcs.length());
+			refStr = refStr.substring(0, pos) + "Ô" + refStr.substring(pos + lcs.length());
 		}
 		return idx2LCS.values();
 	}

@@ -1,6 +1,8 @@
 package ca.sfu.dataming.mr;
 
-import org.apache.hadoop.io.LongWritable;
+import ca.sfu.dataming.util.DMConsts;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 
@@ -10,13 +12,29 @@ import java.io.IOException;
  * @author congzicun
  * @since 2014-11-11 11:32 AM
  */
-public class SONReducerTwo extends Reducer<Text, LongWritable, Text, LongWritable> {
+public class SONReducerTwo extends Reducer<Text, IntWritable, Text, IntWritable> {
+
+    double supportThrld;
+
     @Override
-    protected void reduce(Text key, Iterable<LongWritable> values, Context context) throws IOException, InterruptedException {
-        long counter = 0;
-        for (LongWritable value : values) {
+    protected void setup(Context context) throws IOException, InterruptedException {
+        Configuration conf = context.getConfiguration();
+        supportThrld = conf.getFloat(DMConsts.SON_SUPPORT_THRSHLD, 0.01f);
+        long totalLines = context.getConfiguration().getLong(DMConsts.TOTAL_BASKET_NUM, 0);
+        if(totalLines == 0)
+            throw new InterruptedException("Total number of baskets can not be zero!");
+
+        supportThrld = (int) (supportThrld * totalLines);
+        System.out.println("supportThrld is " + supportThrld);
+    }
+
+    @Override
+    protected void reduce(Text key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
+        int counter = 0;
+        for (IntWritable value : values) {
             counter += value.get();
         }
-        context.write(key, new LongWritable(counter));
+        if (counter >= supportThrld)
+            context.write(key, new IntWritable(counter));
     }
 }

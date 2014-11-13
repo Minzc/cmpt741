@@ -3,7 +3,7 @@ print_usage ()
 {
   echo "Usage: sh run.sh COMMAND"
   echo "where COMMAND is one of the follows:"
-  echo "son -i <input path> -o <output path> Mine frequent item sets using SON algorithm"
+  echo "son -i <input path> -o <output path> -s <threshold> -r1 <step1 reducer number> -r2 <step2 reducer number> Mine frequent item sets using SON algorithm"
   exit 1
 }
 
@@ -39,5 +39,5 @@ else
   CLASS=$COMMAND
 fi
 
-
+echo $CLASSPATH
 "$JAVA" -Djava.awt.headless=true $HEAP_OPTS -classpath "$CLASSPATH" $CLASS $params

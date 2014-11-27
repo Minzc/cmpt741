@@ -5,6 +5,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * @author congzicun
@@ -30,5 +31,15 @@ public class HDFSUtil {
     public static boolean delFile(String path) throws IOException {
         FileSystem fs = FileSystem.get(DMConfiguration.getInstance());
         return fs.delete(new Path(path), true);
+    }
+
+    public static long getFileSize(String path) throws IOException {
+        FileSystem fs = FileSystem.get(DMConfiguration.getInstance());
+        return fs.getFileStatus(new Path(path)).getLen();
+    }
+
+    public static InputStream getInputStream(String path) throws IOException {
+        FileSystem fs = FileSystem.get(DMConfiguration.getInstance());
+        return fs.open(new Path(path));
     }
 }

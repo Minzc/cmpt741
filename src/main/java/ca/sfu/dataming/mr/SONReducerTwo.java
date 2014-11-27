@@ -24,7 +24,7 @@ public class SONReducerTwo extends Reducer<Text, IntWritable, Text, IntWritable>
         if(totalLines == 0)
             throw new InterruptedException("Total number of baskets can not be zero!");
 
-        supportThrld = (int) (supportThrld * totalLines);
+        supportThrld = supportThrld * totalLines;
         System.out.println("supportThrld is " + supportThrld);
     }
 

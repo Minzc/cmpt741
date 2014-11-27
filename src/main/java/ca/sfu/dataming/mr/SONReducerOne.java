@@ -11,6 +11,9 @@ import java.io.IOException;
  * @since 2014-11-11 10:10 AM
  */
 public class SONReducerOne extends Reducer<Text,NullWritable, Text, NullWritable> {
+    enum IsCounter{
+        IS_COUNTER
+    }
     @Override
     protected void reduce(Text key, Iterable<NullWritable> values, Context context) throws IOException, InterruptedException {
         context.write(key, NullWritable.get());

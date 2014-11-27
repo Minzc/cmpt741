@@ -21,7 +21,7 @@ fi
 
 
 JAVA=$JAVA_HOME/bin/java
-HEAP_OPTS="-Xmx1000m -XX:PermSize=128m -XX:MaxPermSize=512m"
+HEAP_OPTS="-Xmx2000m -XX:PermSize=128m -XX:MaxPermSize=512m"
 
 CLASSPATH=${CLASSPATH}:$JAVA_HOME/lib/tools.jar
 CLASSPATH=${CLASSPATH}:conf
@@ -39,5 +39,4 @@ else
   CLASS=$COMMAND
 fi
 
-echo $CLASSPATH
 "$JAVA" -Djava.awt.headless=true $HEAP_OPTS -classpath "$CLASSPATH" $CLASS $params

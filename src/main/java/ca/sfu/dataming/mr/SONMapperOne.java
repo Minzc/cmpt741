@@ -42,18 +42,18 @@ public class SONMapperOne extends Mapper<LongWritable, Text, Text, NullWritable>
 
     @Override
     protected void cleanup(Context context) throws IOException, InterruptedException {
-        supportThrld = Math.floor(totalBskts * supportThrld);
-        System.out.println("Threshold is " + supportThrld + ". total num is " + totalBskts);
+        supportThrld = totalBskts * supportThrld;
+//        System.out.println("Threshold is " + supportThrld + ". total num is " + totalBskts);
 
-        System.out.println("Before Pruning: " + candidateItemsets.size());
+//        System.out.println("Before Pruning: " + candidateItemsets.size());
         candidateItemsets = rmNotFrq(candidateItemsets);
-        System.out.println("After Pruning: " + candidateItemsets.size());
+//        System.out.println("After Pruning: " + candidateItemsets.size());
 
 
         for (String oneItem : candidateItemsets.keySet()) {
             context.write(new Text(oneItem), NullWritable.get());
         }
-        System.out.println("Finish Output Length one");
+//        System.out.println("Finish Output Length one");
 
         while (!candidateItemsets.isEmpty()) {
             Map<String, Set<Integer>> tmpCandidates = new HashMap<String, Set<Integer>>();
@@ -64,7 +64,7 @@ public class SONMapperOne extends Mapper<LongWritable, Text, Text, NullWritable>
             for (Map.Entry<String, Set<Integer>> i : candidateItemsets.entrySet()) {
                 for (Map.Entry<String, Set<Integer>> j : candidateItemsets.entrySet()) {
                     if (i != j && !used.contains(j.getKey())) {
-                        System.out.println("Start union");
+//                        System.out.println("Start union");
                         String iPrefix = prefixIndx.get(i.getKey()).getFirst();
                         String jPrefix = prefixIndx.get(j.getKey()).getFirst();
                         if (iPrefix.equals(jPrefix)) {
@@ -86,8 +86,8 @@ public class SONMapperOne extends Mapper<LongWritable, Text, Text, NullWritable>
                             int newLstItem = prfxNlst.getSecond();
                             String newItemSet = newPrefix + StringUtil.DELIMIT_1ST + newLstItem;
 
-                            System.out.println(newItemSet);
-                            System.out.println(unionTids.size());
+//                            System.out.println(newItemSet);
+//                            System.out.println(unionTids.size());
                             if (unionTids.size() < supportThrld)
                                 continue;
 
@@ -105,11 +105,11 @@ public class SONMapperOne extends Mapper<LongWritable, Text, Text, NullWritable>
                 used.add(i.getKey());
                 candidateItemsets.put(i.getKey(), new HashSet<Integer>());
             }
-            candidateItemsets.clear();
-            prefixIndx.clear();
+//            candidateItemsets.clear();
+//            prefixIndx.clear();
             candidateItemsets = tmpCandidates;
             prefixIndx = tmpPrefixIndx;
-            System.out.println("Finish");
+//            System.out.println("Finish");
         }
         System.out.println("Finish Cleaning UP");
 
@@ -151,18 +151,17 @@ public class SONMapperOne extends Mapper<LongWritable, Text, Text, NullWritable>
 
     private Map<String, Set<Integer>> rmNotFrq(Map<String, Set<Integer>> candidates) {
         Iterator<Map.Entry<String, Set<Integer>>> it = candidates.entrySet().iterator();
-        // TODO
-        System.out.println("=====================");
-        System.out.println("Pruning One Items");
+//        System.out.println("=====================");
+//        System.out.println("Pruning One Items");
         while (it.hasNext()) {
             Map.Entry<String, Set<Integer>> tmp = it.next();
             System.out.println(tmp.getKey());
             if (tmp.getValue().size() < supportThrld) {
                 it.remove();
-                System.out.println("it's removed. value is " + tmp.getValue().size());
+//                System.out.println("it's removed. value is " + tmp.getValue().size());
             }
         }
-        System.out.println("=====================");
+//        System.out.println("=====================");
         return candidates;
     }
 }

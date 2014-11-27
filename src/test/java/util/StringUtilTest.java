@@ -1,6 +1,7 @@
 package util;
 
 import ca.sfu.dataming.util.StringUtil;
+import org.apache.commons.lang.ArrayUtils;
 import org.junit.Test;
 
 import java.util.HashSet;
@@ -32,5 +33,11 @@ public class StringUtilTest {
         b.add("b");
         b.retainAll(a);
         System.out.println(b.size());
+    }
+
+    @Test
+    public void testMerge(){
+        int[] array = {1,2,3};
+        System.out.println(StringUtil.mergeArray(ArrayUtils.toObject(array), StringUtil.DELIMIT_1ST));
     }
 }

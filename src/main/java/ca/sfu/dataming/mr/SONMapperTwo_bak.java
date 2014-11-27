@@ -20,10 +20,11 @@ import java.util.Set;
  * @author congzicun
  * @since 2014-11-11 11:32 AM
  */
-public class SONMapperTwo extends Mapper<LongWritable, Text, Text, IntWritable> {
+public class SONMapperTwo_bak extends Mapper<LongWritable, Text, Text, IntWritable> {
     Set<String> cItemSets = new HashSet<String>();
+    Map<String, Set<Integer>> candidateItemsets = new HashMap<String, Set<Integer>>();
+    Map<String, Pair<String, Integer>> prefixIndx = new HashMap<String, Pair<String, Integer>>();
     int lnCounter = 0;
-    FreqDist<String> counter = new FreqDist<String>();
 
     @Override
     protected void setup(Context context) throws IOException, InterruptedException {
@@ -44,65 +45,71 @@ public class SONMapperTwo extends Mapper<LongWritable, Text, Text, IntWritable> 
 
     @Override
     protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
-        lnCounter++;
-        Set<String> candidateItemsets = new HashSet<String>();
-        Map<String, Pair<String, Integer>> prefixIndx = new HashMap<String, Pair<String, Integer>>();
+        lnCounter ++;
         for (String item : value.toString().split(StringUtil.Split_Sign.SPLIT_SPACE.getSign())) {
             // check if item a frequent item
             if (cItemSets.contains(item)) {
-                counter.incr(item);
-                candidateItemsets.add(item);
+                if (!candidateItemsets.containsKey(item)) {
+                    Set<Integer> tids = new HashSet<Integer>();
+                    candidateItemsets.put(item, tids);
+                }
+                candidateItemsets.get(item).add((int) key.get());
                 prefixIndx.put(item, new Pair<String, Integer>("", Integer.parseInt(item)));
             }
         }
+    }
 
+    @Override
+    protected void cleanup(Context context) throws IOException, InterruptedException {
+        for (String oneItem : candidateItemsets.keySet()) {
+            context.write(new Text(oneItem), new IntWritable(candidateItemsets.get(oneItem).size()));
+        }
 
         while (!candidateItemsets.isEmpty()) {
-            Set<String> tmpCandidates = new HashSet<String>();
+            Map<String, Set<Integer>> tmpCandidates = new HashMap<String, Set<Integer>>();
             Map<String, Pair<String, Integer>> tmpPrefixIndx = new HashMap<String, Pair<String, Integer>>();
 
 
             Set<String> used = new HashSet<String>();
-            for (String i : candidateItemsets) {
-                for (String j : candidateItemsets) {
-                    if (!i.equals(j) && !used.contains(j)) {
-                        String iPrefix = prefixIndx.get(i).getFirst();
-                        String jPrefix = prefixIndx.get(j).getFirst();
-                        int iElement = prefixIndx.get(i).getSecond();
-                        int jElement = prefixIndx.get(j).getSecond();
+            for (Map.Entry<String, Set<Integer>> i : candidateItemsets.entrySet()) {
+                for (Map.Entry<String, Set<Integer>> j : candidateItemsets.entrySet()) {
+                    if (i != j && !used.contains(j.getKey())) {
+                        String iPrefix = prefixIndx.get(i.getKey()).getFirst();
+                        String jPrefix = prefixIndx.get(j.getKey()).getFirst();
+                        int iElement = prefixIndx.get(i.getKey()).getSecond();
+                        int jElement = prefixIndx.get(j.getKey()).getSecond();
                         if (iPrefix.equals(jPrefix)) {
+                            // union two item sets' tid list
+                            Set<Integer> unionTids = new HashSet<Integer>(candidateItemsets.get(i.getKey()));
+                            unionTids.retainAll(candidateItemsets.get(j.getKey()));
 
                             // generate the prefix and last element of the new item set
                             Pair<String, Integer> prfxNlst = SONMapperOne.genNewItemSets(iPrefix, iElement, jElement);
 
-                            String newPrefix = prfxNlst.getFirst();
+                            String newPrefix = prfxNlst.getFirst() ;
                             int newLstItem = prfxNlst.getSecond();
                             String newItemSet = newPrefix + StringUtil.DELIMIT_1ST + newLstItem;
 
 
                             // Prune the new item set
                             if (cItemSets.contains(newItemSet)) {
-                                tmpCandidates.add(newItemSet);
+                                tmpCandidates.put(newItemSet, unionTids);
                                 // update tmpIndex
                                 tmpPrefixIndx.put(newItemSet, new Pair<String, Integer>(newPrefix, newLstItem));
-                                counter.incr(newItemSet);
+                                context.write(new Text(newItemSet), new IntWritable(unionTids.size()));
+//                                if(newItemSet.split(StringUtil.STR_DELIMIT_1ST).length > 1)
+//                                    System.out.println("out!");
                             }
+//                            if(newItemSet.split(StringUtil.STR_DELIMIT_1ST).length > 1)
+//                                System.out.println(newItemSet);
 
                         }
                     }
                 }
-                used.add(i);
+                used.add(i.getKey());
             }
             candidateItemsets = tmpCandidates;
             prefixIndx = tmpPrefixIndx;
-        }
-    }
-
-    @Override
-    protected void cleanup(Context context) throws IOException, InterruptedException {
-
-        for (String itemset : counter.keySet()) {
-            context.write(new Text(itemset), new IntWritable(counter.get(itemset)));
         }
     }
 }
